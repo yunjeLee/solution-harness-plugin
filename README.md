@@ -90,19 +90,15 @@ flowchart TD
     W --> P["계획 (선택)"]:::gate
     P --> PR["계획 검증<br/>plan-reviewer"]:::gate
     PR --> TDD["TDD 구현 (unit)"]:::auto
-    TDD --> IT["통합/E2E 필요 판단<br/>(work 6.5)<br/>호출/생략 사유 기록"]:::auto
+    TDD --> IT["통합 필요 판단<br/>(work 6.5)<br/>호출/생략 사유 기록"]:::auto
     IT -->|모듈 경계 가로지름| ITS["integration-test<br/>통합 코드 작성"]:::auto
-    IT -->|플로우 완성| E2E["e2e-test<br/>E2E 코드 작성"]:::auto
     ITS --> Q{"결과물 OK?"}
-    E2E --> Q
     Q -->|하네스 위반| HC
     Q -->|OK| CRI["완료기준 검증<br/>completion-verifier"]:::auto
     CRI --> Q2{에러 발생?}
     Q2 -->|에러| BF["bug-fix<br/>자동 수정"]:::auto
     BF -->|재검증 ≤5회| CRI
     Q2 -->|통과| DONE([✅ 완료 → 커밋]):::gate
-    DONE --> HU["변경분 문서 동기화<br/>(주기적 업데이트)<br/>/harness-update"]:::auto
-    HU -->|drift 갱신·재검증| H
 
     BF -->|5회 초과·동일원인 재발| HC
     HC["harness-check<br/>문서 진단(triage)"]:::harness
