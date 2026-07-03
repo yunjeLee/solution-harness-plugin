@@ -1,9 +1,9 @@
 {
-  "name": "yeoboya-workflow-v2",
+  "name": "solution-harness-plugin",
   "version": "0.5.9",
   "description": "앱팀 공통 harness-engineering 워크플로우 플러그인 V2 (Android / iOS) — 계획→TDD→검증→bug-fix 닫힌 루프",
   "author": {
-    "name": "yeoboya"
+    "name": "yunjelly"
   },
   "hooks": {
     "PreToolUse": [
