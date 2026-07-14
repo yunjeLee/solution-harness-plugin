@@ -15,14 +15,14 @@ read & write agent 가 코드를 읽어 **초안을 자동 생성** → 검증 a
 - **자동 적재** `docs/`: ARCHITECTURE, CONVENTIONS, SESSION
 - **조건부 로딩** `docs/rules/`: PRD, ADR, TESTING (+ UI_GUIDE 선택)
 - **루트**: CLAUDE.md (자동 로드 주체 — 트리거를 담는 그릇)
-- 스키마: `@${CLAUDE_PLUGIN_ROOT}/shared/templates/root-docs.md`
+- 스키마: `@${CLAUDE_PLUGIN_ROOT}/shared/templates/root-docs.md` (인덱스). 문서별 상세 템플릿은 `shared/templates/root/{문서}.md`(claude→claude-md.md, ui_guide→ui-guide.md) — 에이전트 위임 시 각 대상 문서의 per-doc 경로를 전달한다.
 
 ## 절차
 1. **존재 점검**: 7종이 모두 있으면 → "수정은 /harness-root-edit 를 쓰라" 안내 후 종료.
 
 2. 일부만 있으면 → 기존 문서는 두고 **없는 문서만** 대상으로 잡는다.
 
-3. **초안 생성**: `harness-read-write` 에이전트에 (mode=create, 대상=root, 누락 문서 목록, 스키마 경로, 레포 루트)를 전달해 위임. 산출물은 `docs/*.md` + `docs/rules/*.md` + `CLAUDE.md` 로 파일 저장.
+3. **초안 생성**: `harness-read-write` 에이전트에 (mode=create, 대상=root, 누락 문서 목록, 스키마 경로, 각 문서의 per-doc 스키마 경로(`shared/templates/root/{문서}.md`)를 전달, 레포 루트)를 전달해 위임. 산출물은 `docs/*.md` + `docs/rules/*.md` + `CLAUDE.md` 로 파일 저장.
 
 4. **적재 정책**: CLAUDE.md 에 아래가 기재되었는지 확인.
    - **자동 적재 (항상 `@`)**: ARCHITECTURE / CONVENTIONS / SESSION 3종. SESSION 은 자동 적재 대상이므로 **짧은 규칙 목록**으로만 유지.

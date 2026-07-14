@@ -12,7 +12,7 @@ model: opus
 ## 절차
 1. **인자 확인**: 인자가 없으면 → 수정 가능한 문서 목록을 보여주고 "어떤 문서를 수정할까요?" 질문 후 종료/대기.
 
-2. **위임**: 코드 읽기·갱신을 `harness-read-write` 에이전트에 위임한다 (mode=update, 대상=root, 수정 문서 1개, 스키마 경로, 레포 루트). 문서 갱신은 레포 실상 일치를 맞추려면 코드를 읽어야 하므로 위임이 기본이다. 메인 컨텍스트는 격리된다.
+2. **위임**: 코드 읽기·갱신을 `harness-read-write` 에이전트에 위임한다 (mode=update, 대상=root, 수정 문서 1개, per-doc 스키마 경로 `${CLAUDE_PLUGIN_ROOT}/shared/templates/root/{인자 문서명}.md`(예: `/harness-root-edit prd` → `shared/templates/root/prd.md`)(arg→파일 매핑: `claude` → `claude-md.md`, `ui_guide` → `ui-guide.md`, 나머지는 동일명), 레포 루트). 문서 갱신은 레포 실상 일치를 맞추려면 코드를 읽어야 하므로 위임이 기본이다. 메인 컨텍스트는 격리된다.
 
 3. **검증**: `/harness-verify root` 로 검증 agent 6축 검사를 받는다.
 
