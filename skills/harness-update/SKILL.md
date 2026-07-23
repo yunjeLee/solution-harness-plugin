@@ -29,6 +29,7 @@ decay hook 은 커밋당 알림만 주고, edit 스킬은 한 문서씩 수동�
 2. **워크플로우 실행**: `DOC` 라인들을 `candidates` 배열(`[{path, kind}]`)로 묶어 `Workflow` 를 호출한다.
    - `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/harness-update/script/harness-update.js`
    - `args: { repoRoot: <레포 루트>, candidates: <위 배열>, moduleSchema: "${CLAUDE_PLUGIN_ROOT}/shared/templates/module-claude.md", rootSchema: "${CLAUDE_PLUGIN_ROOT}/shared/templates/root-docs.md" }` (rootSchema 는 인덱스이며, per-doc 상세는 인덱스가 `root/{문서}.md` 로 안내)
+   - `args` 는 **실제 JSON 객체로 전달한다. JSON 문자열로 감싸면 `candidates` 가 빈 배열이 되어 "drift 없음"으로 오탐한다.**
    - 워크플로우가 **[후보 6축 검증으로 drift 감지 → drift 문서만 최소 diff 갱신 → 재검증]** 을 격리 실행하고 `{ scanned, updated:[{path,summary,tbd,reverify}], clean, blocked:[path...] }` 를 반환한다.
    - 갱신본은 워커가 **파일로 Edit** 한다 (핸드오프는 파일 경유).
    - drift 0건이면 `updated` 가 비어 온다 → 그대로 사람에게 "변경 불필요" 보고 후 5번(마커 기록)으로.

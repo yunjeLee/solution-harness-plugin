@@ -14,10 +14,20 @@ export const meta = {
 //   args.candidates    : [{ path, kind:'module'|'root'|'rule' }] — 스코핑 스크립트가 고른 후보
 //   args.moduleSchema  : module CLAUDE.md 스키마 경로
 //   args.rootSchema    : 루트/rule 문서 스키마 경로
-const repoRoot = (args && args.repoRoot) || '.'
-const candidates = (args && args.candidates) || []
-const moduleSchema = (args && args.moduleSchema) || 'shared/templates/module-claude.md'
-const rootSchema = (args && args.rootSchema) || 'shared/templates/root-docs.md'
+const input = typeof args === 'string' ? JSON.parse(args) : args || {}
+const repoRoot = input.repoRoot || '.'
+const candidates = input.candidates || []
+const moduleSchema = input.moduleSchema || 'shared/templates/module-claude.md'
+const rootSchema = input.rootSchema || 'shared/templates/root-docs.md'
+
+// 후보 0건은 언제나 호출 측 버그다 — 스킬이 스코핑 단계에서 이미 "DOC 라인 없으면 종료"로
+// 걸러내므로 여기까지 빈 배열이 오면 args 전달이 깨진 것. 조용히 "drift 없음"으로
+// 반환하면 멀쩡한 성공으로 보고되고 마커까지 전진해 변경분을 영영 놓친다.
+if (!Array.isArray(candidates) || candidates.length === 0) {
+  throw new Error(
+    'harness-update: candidates 가 비었다. 스킬이 scope 스크립트의 DOC 라인을 args.candidates(배열)로 넘겼는지 확인할 것.'
+  )
+}
 
 const RW = 'solution-harness-plugin:harness-read-write'
 const VERIFIER = 'solution-harness-plugin:harness-doc-verifier'
