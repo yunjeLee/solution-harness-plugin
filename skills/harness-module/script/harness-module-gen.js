@@ -18,8 +18,8 @@ const repoRoot = (args && args.repoRoot) || '.'
 const moduleSchema = (args && args.moduleSchema) || 'shared/templates/module-claude.md'
 const ruleSchema = (args && args.ruleSchema) || moduleSchema
 
-const RW = 'yeoboya-workflow-v2:harness-read-write'
-const VERIFIER = 'yeoboya-workflow-v2:harness-doc-verifier'
+const RW = 'solution-harness-plugin:harness-read-write'
+const VERIFIER = 'solution-harness-plugin:harness-doc-verifier'
 
 // ── 구조화 스키마 ────────────────────────────────────────────────────
 const SCOUT_SCHEMA = {

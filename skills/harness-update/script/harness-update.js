@@ -19,8 +19,8 @@ const candidates = (args && args.candidates) || []
 const moduleSchema = (args && args.moduleSchema) || 'shared/templates/module-claude.md'
 const rootSchema = (args && args.rootSchema) || 'shared/templates/root-docs.md'
 
-const RW = 'yeoboya-workflow-v2:harness-read-write'
-const VERIFIER = 'yeoboya-workflow-v2:harness-doc-verifier'
+const RW = 'solution-harness-plugin:harness-read-write'
+const VERIFIER = 'solution-harness-plugin:harness-doc-verifier'
 
 // ── 구조화 스키마 ────────────────────────────────────────────────────
 const VERIFY_SCHEMA = {
