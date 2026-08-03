@@ -30,7 +30,9 @@
 | `harness-read-write` | 코드 읽고 문서 초안 작성 (sonnet) |
 | `harness-doc-verifier` | 문서 6축 검증 (opus) |
 | `plan-reviewer` | 계획 7축 검토 (opus) |
-| `completion-verifier` | 완료기준 명령 격리 실행·결과 보고 (opus) |
+| `completion-verifier` | 6c Red 확인·완료기준 명령 격리 실행·결과 보고 (opus) |
+| `test-writer` | 3열 명세를 받아 테스트 코드 작성 — 스킬만 호출 (opus) |
+| `test-reviewer` | 작성된 테스트의 단언 품질 4축 진단 — 수정 안 함 (opus) |
 
 ### Hooks
 | Hook | 역할 |
@@ -115,10 +117,12 @@ flowchart TD
     P --> PR["계획 검증<br/>plan-reviewer"]:::gate
     PR --> UT["6a~6b unit 테스트 작성<br/>(unit-test 스킬)"]:::auto
     UT --> RED["6c Red 확인<br/>completion-verifier"]:::auto
+    RED -->|통과해 버림| TR
     RED --> IMPL["6d 프로덕션 구현<br/>(메인)"]:::auto
     IMPL --> IT["통합 필요 판단<br/>(work 6.5)<br/>호출/생략 사유 기록"]:::auto
-    IT -->|모듈 경계 가로지름| ITS["integration-test<br/>통합 코드 작성"]:::auto
-    ITS --> Q{"결과물 OK?"}
+    IT -->|모듈 경계 가로지름| ITS["integration-test<br/>test-writer 위임"]:::auto
+    ITS --> TR["test-reviewer<br/>6c 원인 판정 · 6.7 전체 검토"]:::auto
+    TR --> Q{"결과물 OK?"}
     Q -->|하네스 위반| HC
     Q -->|OK| CRI["완료기준 검증<br/>completion-verifier"]:::auto
     CRI --> Q2{에러 발생?}

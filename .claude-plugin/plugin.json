@@ -1,6 +1,6 @@
 {
   "name": "solution-harness-plugin",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "앱팀 공통 harness-engineering 워크플로우 플러그인 V2 (Android / iOS) — 계획→테스트 작성→Red 확인→구현→검증→bug-fix 닫힌 루프",
   "author": {
     "name": "yunjelly"
