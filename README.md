@@ -1,7 +1,7 @@
 # solution-harness-plugin
 
 앱팀(Android / iOS) 공통 **harness-engineering** 워크플로우 플러그인.
-입력 → (계획 → 계획검수) → TDD → 통합/E2E → 검증 → bug-fix 로 이어지는 **닫힌 루프**를 구성하고, 하네스 문서로 Claude Code 에 프로젝트 그래프를 제공한다.
+입력 → 테스트 레벨 확정 → (계획 → 계획검수) → TDD → 통합/E2E → 검증 → bug-fix 로 이어지는 **닫힌 루프**를 구성하고, 하네스 문서로 Claude Code 에 프로젝트 그래프를 제공한다.
 
 ## 사전 요구
 - **`superpowers` 플러그인 (필수)** — `work` 가 `superpowers:test-driven-development`(TDD) 를 호출한다. 미설치 시 `/work` 의 TDD 단계가 동작하지 않는다.
@@ -18,7 +18,7 @@
 | `harness-update` | 변경분(git diff) 기준 하네스 문서 주기적 update (변경 추출 -> update -> 검증) |
 | `harness-verify` | root/module 문서 6축 검증 |
 | `harness-check` | 산출물↔하네스 불일치 진단 → 로컬 기록 |
-| `work` | 닫힌 루프 엔진 (입력→(계획→검토)→TDD→통합/E2E→검증) |
+| `work` | 닫힌 루프 엔진 (입력→레벨 확정→(계획→검토)→TDD→통합/E2E→검증) |
 | `integration-test` | 모듈 경계 통합 테스트 **코드 작성** (test-after). work 6.5 가 경계 감지 시 호출 — 실행은 안 함 |
 | `e2e-test` | 사용자 플로우 E2E 테스트 **코드 작성** (test-after). work 6.5 가 플로우 완성 시 호출 — 자동 실행 안 함(사람 게이트) |
 | `pin` | 진행 중 work 의 현재 상태를 활성 run 파일에 즉시 스냅샷 (갱신만) |
@@ -44,10 +44,32 @@
 | `harness-update-scope.sh` | `harness-update` 의 결정론적 스코핑 — 변경분→갱신 후보 문서(module/root/rule) 매핑 |
 | `harness-update.js` | `harness-update` 이 호출하는 워크플로우 — 후보 6축 검증으로 drift 감지→썩은 문서만 최소 diff 갱신→재검증 격리 실행 |
 
-### 내부 루프 문서 (스킬 아님 — `/` 노출 안 됨)
+### 내부 참조 문서 (스킬 아님 — `/` 노출 안 됨)
 | 문서 | 역할 |
 |------|------|
 | `shared/bug-fix-loop.md` | 검증 실패 자동 수정 루프 (최대 5회). work 7단계가 Read 해 실행 — 외부 직접 호출 불가 |
+| `shared/test-levels.md` | 테스트 레벨 정의 + `harness.config.yml` 형식·판정 규칙. work 1.5 와 테스트 스킬들의 단일 출처 |
+
+## 프로젝트 설정 — `harness.config.yml`
+
+대상 프로젝트 루트에 이 파일을 두면 **어느 레벨의 테스트를 쓸지**를 선언할 수 있다. 플러그인이 자동 생성하지는 않는다.
+
+```yaml
+# 이 프로젝트가 쓸 테스트 레벨. 쉼표로 구분한다.
+test.levels: unit, integration
+```
+
+| 값 | 대상 | 담당 스킬 |
+|---|---|---|
+| `unit` | 한 모듈 안 — ViewModel / UseCase / Mapper / 순수 함수 | `unit-test` |
+| `integration` | 모듈 경계를 넘는 데이터·계약 | `integration-test` |
+| `ui` | Composable 렌더링 · 화면 조작 · 기기 플로우 (**Robolectric 포함**) | `e2e-test` |
+| `none` | 테스트를 작성하지 않는다 | — |
+
+- **파일이 없거나 `test.levels` 가 비어 있으면 기본값 `unit, integration`.** UI 테스트는 기본으로 꺼져 있다.
+- **"설정 안 함"과 "테스트 안 씀"은 다르다.** 후자는 `test.levels: none` 을 명시해야 한다.
+- 형식 위반(`test.levels:unit` — 콜론 뒤 공백 누락)이나 `none` 혼용(`none, unit`)은 자동 해석하지 않고 **사람에게 되묻는다.**
+- 정의·판정 규칙의 단일 출처는 `shared/test-levels.md`.
 
 ## 생성 파일
 
@@ -87,7 +109,8 @@
 flowchart TD
     H["하네스 구축<br/>/harness-root · /harness-module"]:::harness
     H --> W["/work 시작<br/>입력 폼 수집"]:::auto
-    W --> P["계획 (선택)"]:::gate
+    W --> LV["1.5 테스트 레벨 확정<br/>harness.config.yml"]:::auto
+    LV --> P["계획 (선택)"]:::gate
     P --> PR["계획 검증<br/>plan-reviewer"]:::gate
     PR --> TDD["TDD 구현 (unit)"]:::auto
     TDD --> IT["통합 필요 판단<br/>(work 6.5)<br/>호출/생략 사유 기록"]:::auto
