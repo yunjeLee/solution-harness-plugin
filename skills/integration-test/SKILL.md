@@ -1,12 +1,12 @@
 ---
 name: integration-test
-description: "모듈과 모듈 사이 경계를 검증하는 통합 테스트 코드를 작성할 때 사용한다(test-after). 'A 모듈과 B 모듈 통합 테스트', 'repository 에서 api·datasource 호출하는 경계 테스트', 'DTO 가 도메인 모델로 매핑되는지 검증', 'api→repository→usecase 흐름 테스트', 'cross-module 테스트', 'Robolectric 으로 repository 통합' 처럼 두 모듈·컴포넌트가 연결되는 지점을 단언하는 테스트를 요청하면 사용한다. work 6.5 에서 변경이 모듈 경계를 가로지를 때 자동 호출된다. 단, 단일 클래스·함수의 단위 테스트(→ superpowers:test-driven-development)나 화면을 눌러가는 사용자 플로우 E2E(→ e2e-test)는 이 스킬이 아니다. 테스트를 실행하지는 않는다 — 작성만 한다(실행은 completion-verifier)."
+description: "모듈과 모듈 사이 경계를 검증하는 통합 테스트 코드를 작성할 때 사용한다(test-after). 'A 모듈과 B 모듈 통합 테스트', 'repository 에서 api·datasource 호출하는 경계 테스트', 'DTO 가 도메인 모델로 매핑되는지 검증', 'api→repository→usecase 흐름 테스트', 'cross-module 테스트', 'Robolectric 으로 repository 통합' 처럼 두 모듈·컴포넌트가 연결되는 지점을 단언하는 테스트를 요청하면 사용한다. work 6.5 에서 변경이 모듈 경계를 가로지를 때 자동 호출된다. 단, 단일 클래스·함수의 단위 테스트(→ unit-test)나 화면을 눌러가는 사용자 플로우 E2E(→ e2e-test)는 이 스킬이 아니다. 테스트를 실행하지는 않는다 — 작성만 한다(실행은 completion-verifier)."
 model: opus
 ---
 
 # integration-test — 모듈 경계 통합 테스트 작성 (test-after)
 
-TDD 가 채우는 *한 모듈 안* sociable unit 밖, **모듈↔모듈 경계**를 단언하는 통합 테스트 *코드를 작성*한다. 돌리지는 않는다.
+`unit-test` 가 채우는 *한 모듈 안* sociable unit 밖, **모듈↔모듈 경계**를 단언하는 통합 테스트 *코드를 작성*한다. 돌리지는 않는다.
 
 ## 강제 법칙
 
