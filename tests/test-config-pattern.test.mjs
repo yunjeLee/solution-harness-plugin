@@ -99,3 +99,33 @@ test('shared/test-levels.md 가 판정 패턴 3개를 정의한다', () => {
   assert.match(p.MALFORMED, /^\^test/, '3-0 패턴이 ^test 앵커로 시작하지 않는다');
   assert.match(p.PRESENT, /^\^test/, '3-2 패턴이 ^test 앵커로 시작하지 않는다');
 });
+
+// 생성 템플릿(§2)은 문서의 유일한 ```yaml 펜스다.
+// work 1.5 와 /test-level 이 이 내용 그대로 파일을 만든다.
+// 펜스가 여러 개면 어느 게 템플릿인지 알 수 없으므로 개수부터 못 박는다.
+function loadTemplate() {
+  const md = readFileSync(LEVELS_DOC, 'utf8');
+  const found = [...md.matchAll(/```yaml\n([\s\S]*?)```/g)].map((m) => m[1]);
+  assert.equal(
+    found.length,
+    1,
+    `shared/test-levels.md 의 \`\`\`yaml 펜스가 1개가 아니다 (${found.length}개)`,
+  );
+  return found[0];
+}
+
+test('생성 템플릿: 형식 위반이 아니고 기본 레벨만 켜진다', () => {
+  const f = writeConfig(loadTemplate());
+  assert.equal(judge(f, 'unit'), 'ON');
+  assert.equal(judge(f, 'integration'), 'ON');
+  assert.equal(judge(f, 'ui'), 'OFF');
+  assert.equal(judge(f, 'none'), 'OFF');
+});
+
+// 자동 생성된 파일을 처음 본 사람이 "이걸 어떻게 바꾸지"를 파일 안에서 알 수 있어야 한다.
+// 안내가 없으면 사용자는 손으로 고치고, 그 과정에서 형식 위반이 들어온다.
+test('생성 템플릿: 값 목록과 변경 방법을 주석으로 담는다', () => {
+  const t = loadTemplate();
+  assert.match(t, /^# 값: unit \/ integration \/ ui \/ none$/m, '템플릿에 값 목록 주석이 없다');
+  assert.match(t, /^# 변경: \/test-level$/m, '템플릿에 변경 방법 안내가 없다');
+});

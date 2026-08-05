@@ -31,10 +31,20 @@
 
 `.harness/` 안에 두지 않는다. `work` 가 `.harness/` 를 `.gitignore` 에 자동 등록하기 때문이다. 설정은 팀 정책이므로 커밋되어야 하고, 변경이 PR diff 에 드러나야 한다.
 
+### 생성 템플릿
+
+파일이 없을 때 **이 블록 그대로** 만든다. 이 블록이 생성 내용의 단일 출처다.
+
 ```yaml
 # 이 프로젝트가 쓸 테스트 레벨. 쉼표로 구분한다.
+# 값: unit / integration / ui / none
+# 변경: /test-level
 test.levels: unit, integration
 ```
+
+**생성 창구는 `work` 1.5 와 `/test-level` 둘뿐이다.** `unit-test` · `integration-test` · `e2e-test` 는 이 파일을 만들지 않는다. 창구가 늘면 누가 만들었는지 추적할 수 없다.
+
+파일이 **있는데** 키나 값이 비어 있으면 생성 창구는 **고치지 않는다** — `/test-level` 로 사람이 바꾼다.
 
 ### 형식 — flat key-value 고정
 
@@ -146,6 +156,7 @@ grep -m1 '^test\.levels:' harness.config.yml
 
 | 주체 | 용도 |
 |---|---|
+| `/test-level` | 현재 설정을 표시하고 레벨을 변경. 파일이 없으면 생성 |
 | `work` 1.5 | 이번 작업에 어느 레벨의 테스트를 작성·위임할지 확정. 결과를 run 파일에 1줄 기록 |
 | `unit-test` 스킬 | `unit` 이 꺼져 있으면 작성하지 않고 사유를 run 파일에 기록 |
 | `integration-test` 스킬 | `integration` 이 꺼져 있으면 작성하지 않고 사유를 run 파일에 기록 |
