@@ -129,3 +129,13 @@ test('생성 템플릿: 값 목록과 변경 방법을 주석으로 담는다', 
   assert.match(t, /^# 값: unit \/ integration \/ ui \/ none$/m, '템플릿에 값 목록 주석이 없다');
   assert.match(t, /^# 변경: \/test-level$/m, '템플릿에 변경 방법 안내가 없다');
 });
+
+// README 는 생성 템플릿의 두 번째 사본을 두지 않는다 — 단일 출처는 shared/test-levels.md §2 뿐이다.
+// ```yaml 펜스가 다시 생기면 그 내용이 §2 템플릿과 반드시 같아야 드리프트를 막는다.
+test('README 는 생성 템플릿 사본을 두지 않는다', () => {
+  const md = readFileSync(ROOT + 'README.md', 'utf8');
+  const found = [...md.matchAll(/```yaml\n([\s\S]*?)```/g)].map((m) => m[1]);
+  if (found.length === 0) return;
+  assert.equal(found.length, 1, 'README 에 ```yaml 펜스가 여러 개다');
+  assert.equal(found[0], loadTemplate(), 'README 의 yaml 사본이 shared/test-levels.md §2 템플릿과 다르다 — 드리프트');
+});

@@ -52,16 +52,13 @@
 | 문서 | 역할 |
 |------|------|
 | `shared/bug-fix-loop.md` | 검증 실패 자동 수정 루프 (최대 5회). work 7단계가 Read 해 실행 — 외부 직접 호출 불가 |
-| `shared/test-levels.md` | 테스트 레벨 정의 + `harness.config.yml` 형식·판정 규칙. work 1.5 와 테스트 스킬들의 단일 출처 |
+| `shared/test-levels.md` | 테스트 레벨 정의 + `harness.config.yml` 형식·판정 규칙. `work` 1.5·`/test-level`·테스트 스킬들의 단일 출처 |
 
 ## 프로젝트 설정 — `harness.config.yml`
 
 대상 프로젝트 루트의 이 파일이 **어느 레벨의 테스트를 쓸지**를 선언한다. 손으로 만들 필요는 없다 — `/work` 가 파일이 없으면 만들지 묻고, `/test-level` 로 언제든 바꾼다.
 
-```yaml
-# 이 프로젝트가 쓸 테스트 레벨. 쉼표로 구분한다.
-test.levels: unit, integration
-```
+생성 내용의 단일 출처는 `shared/test-levels.md` §2 생성 템플릿이다. 여기 사본을 두지 않는다.
 
 | 값 | 대상 | 담당 스킬 |
 |---|---|---|
