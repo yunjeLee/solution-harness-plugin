@@ -62,3 +62,21 @@ test('README 스킬 표에 test-level 행이 있다', () => {
   const md = readFileSync(ROOT + 'README.md', 'utf8');
   assert.match(md, /^\| `test-level` \|/m, 'README 스킬 표에 test-level 행이 없다');
 });
+
+// 설정 파일 생성 창구는 정확히 2곳이어야 한다(shared/test-levels.md §2).
+// 세 테스트 스킬이 생성에 가담하면 "누가 만들었는지"를 추적할 수 없다.
+test('harness.config.yml 생성 창구는 work 와 test-level 둘뿐이다', () => {
+  const MARK = '§2 생성 템플릿';
+  const has = (p) => readFileSync(ROOT + p, 'utf8').includes(MARK);
+
+  assert.ok(has('skills/work/SKILL.md'), 'work 1.5 에 생성 게이트가 없다');
+  assert.ok(has('skills/test-level/SKILL.md'), 'test-level 에 생성 절차가 없다');
+
+  for (const p of [
+    'skills/unit-test/SKILL.md',
+    'skills/integration-test/SKILL.md',
+    'skills/e2e-test/SKILL.md',
+  ]) {
+    assert.ok(!has(p), `${p} 가 설정 파일을 생성하려 한다 — 창구는 2곳이어야 한다`);
+  }
+});
