@@ -44,3 +44,21 @@ test('unit-test 스킬이 존재하고 이름이 일치한다', () => {
   const md = readFileSync(ROOT + 'skills/unit-test/SKILL.md', 'utf8');
   assert.match(md, /^name: unit-test$/m, 'frontmatter name 이 unit-test 가 아니다');
 });
+
+test('test-level 스킬이 존재하고 이름이 일치한다', () => {
+  const md = readFileSync(ROOT + 'skills/test-level/SKILL.md', 'utf8');
+  assert.match(md, /^name: test-level$/m, 'frontmatter name 이 test-level 이 아니다');
+});
+
+// 판정 규칙은 shared/test-levels.md 가 단일 출처다. 스킬이 정규식을 복사하면
+// 규칙이 갈라져도 아무도 모른다 — 문자열 수준에서 복사를 금지한다.
+test('test-level 스킬이 판정 규칙을 복사하지 않는다', () => {
+  const md = readFileSync(ROOT + 'skills/test-level/SKILL.md', 'utf8');
+  assert.doesNotMatch(md, /```regex/, '판정 정규식 펜스를 본문에 복사했다');
+  assert.doesNotMatch(md, /\[\[:space:\],\]/, '판정 정규식 조각을 본문에 복사했다');
+});
+
+test('README 스킬 표에 test-level 행이 있다', () => {
+  const md = readFileSync(ROOT + 'README.md', 'utf8');
+  assert.match(md, /^\| `test-level` \|/m, 'README 스킬 표에 test-level 행이 없다');
+});

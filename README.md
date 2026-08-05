@@ -22,6 +22,7 @@
 | `unit-test` | 한 모듈 안 단위 테스트 **코드 작성** (test-first). work 6b 가 호출 — 실행은 안 함 |
 | `integration-test` | 모듈 경계 통합 테스트 **코드 작성** (test-after). work 6.5 가 경계 감지 시 호출 — 실행은 안 함 |
 | `e2e-test` | 사용자 플로우 E2E 테스트 **코드 작성** (test-after). work 6.5 가 플로우 완성 시 호출 — 자동 실행 안 함(사람 게이트) |
+| `test-level` | `harness.config.yml` 테스트 범위 확인·변경 (다중 선택, 없으면 생성) |
 | `pin` | 진행 중 work 의 현재 상태를 활성 run 파일에 즉시 스냅샷 (갱신만) |
 
 ### Sub-agents
