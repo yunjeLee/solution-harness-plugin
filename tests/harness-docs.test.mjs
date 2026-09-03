@@ -116,3 +116,23 @@ test('plan-reviewer 의 대조 대상이 교체됐다', () => {
   assert.ok(!md.includes('CONVENTIONS'), 'CONVENTIONS 참조가 남아 있다');
   assert.ok(!md.includes('ARCHITECTURE'), 'ARCHITECTURE 참조가 남아 있다');
 });
+
+test('gotcha 스킬이 존재하고 접두가 없다', () => {
+  assert.ok(existsSync(ROOT + 'skills/gotcha/SKILL.md'));
+  assert.match(read('skills/gotcha/SKILL.md'), /^name: gotcha$/m);
+  assert.ok(!existsSync(ROOT + 'skills/harness-gotcha'));
+});
+
+test('gotcha 에 배치 3지선다와 상한 교환 규칙이 있다', () => {
+  const md = read('skills/gotcha/SKILL.md');
+  assert.ok(md.includes('docs/GOTCHA.md'));
+  assert.ok(md.includes('{module}/CLAUDE.md'));
+  assert.match(md, /50줄/, '50줄 제안 규칙이 없다');
+  assert.match(md, /60줄/, '60줄 교환 규칙이 없다');
+  assert.match(md, /동점.*모듈|모듈.*기본값/, '동점 기본값 규칙이 없다');
+});
+
+// 이유 없는 항목은 나중에 지울 판단을 못 한다.
+test('gotcha 가 이유를 필수로 요구한다', () => {
+  assert.match(read('skills/gotcha/SKILL.md'), /이유를 반드시|이유가 없으면/);
+});
