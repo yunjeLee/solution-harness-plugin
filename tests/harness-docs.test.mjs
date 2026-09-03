@@ -166,3 +166,18 @@ test('harness-init 이 사람 지식을 덮어쓰지 않는다', () => {
 test('harness-init 이 빈 모듈 문서를 만들지 않는다', () => {
   assert.match(read('skills/harness-init/SKILL.md'), /빈 .*CLAUDE\.md.*만들지 않는다|만들지 않는다.*빈/);
 });
+
+// renderTriggers() 가 이미 '## 조건부 로딩' 을 첫 줄로 출력한다.
+// 템플릿 골격에 같은 헤딩을 정적으로 박아두면 생성된 CLAUDE.md 에 헤딩이 두 번 찍힌다.
+test('claude-md 템플릿 골격에 조건부 로딩 헤딩을 정적으로 박아두지 않는다', () => {
+  const md = read('shared/templates/root/claude-md.md');
+  const lines = md.split('\n');
+  assert.ok(
+    !lines.some((line) => line.trim() === '## 조건부 로딩'),
+    '스크립트 출력이 이미 헤딩을 포함하므로 골격에 헤딩 줄을 정적으로 쓰면 중복된다'
+  );
+  assert.ok(
+    md.includes('{index-modules.mjs 출력}'),
+    '자리표시자가 사라지면 조건부 로딩 블록 자체가 골격에서 빠진 것이다'
+  );
+});

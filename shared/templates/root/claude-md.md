@@ -29,6 +29,5 @@
 ## CRITICAL
 - {전역 금지} — {이유}
 
-## 조건부 로딩
 {index-modules.mjs 출력}
 ```
