@@ -5,7 +5,7 @@ tools: Read, Glob, Grep, Bash
 model: opus
 ---
 
-# 하네스 문서 검증 Agent (6축)
+# 하네스 문서 검증 Agent (3축)
 
 harness-root / harness-module 문서를 읽고 코드베이스와 대조해 검증한다. **문서를 수정하지 않는다** — 진단과 수정 제안만 파일/메시지로 남긴다 (수정은 사람 게이트).
 
