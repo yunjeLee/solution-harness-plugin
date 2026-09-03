@@ -6,6 +6,7 @@ import { join as pjoin } from 'node:path';
 import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
 import { buildGraph } from '../shared/scripts/deps.mjs';
 import { renderModuleMap, renderTriggers } from '../shared/scripts/index-modules.mjs';
+import { collectSignals } from '../shared/scripts/signals.mjs';
 
 const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
 
@@ -103,4 +104,38 @@ test('트리거 블록에 모듈 접근 줄이 없다', () => {
 test('트리거 블록은 존재하는 문서만 등록한다', () => {
   // 픽스처에 docs/rules/ 가 없으므로 TESTING·GIT_WORKFLOW 줄이 없어야 한다.
   assert.doesNotMatch(renderTriggers(FIX), /TESTING\.md/);
+});
+
+test('신호 식별자에 행 번호가 없다', () => {
+  // 행 번호를 쓰면 무관한 편집에도 밀려 "이미 답한 신호"를 다시 묻는다(spec 결정 22).
+  for (const s of collectSignals(FIX)) {
+    assert.match(s.id, /^[a-z]+:[^#]+#.+$/, `형식 위반: ${s.id}`);
+    assert.doesNotMatch(s.id, /#\d+$/, `행 번호가 들어갔다: ${s.id}`);
+  }
+});
+
+test('deprecated 인데 쓰이는 심볼을 찾는다', () => {
+  const hit = collectSignals(FIX).find((s) => s.kind === 'deprecated');
+  assert.ok(hit, 'OldUtil 을 못 찾았다');
+  assert.match(hit.anchor, /OldUtil/);
+});
+
+test('참조 0건 심볼을 찾는다', () => {
+  const hit = collectSignals(FIX).find((s) => s.kind === 'unused');
+  assert.ok(hit, 'UnusedContract 를 못 찾았다');
+  assert.match(hit.anchor, /UnusedContract/);
+});
+
+test('HACK 주석을 찾는다', () => {
+  assert.ok(collectSignals(FIX).some((s) => s.kind === 'hack'));
+});
+
+test('테스트 0개 모듈을 찾는다', () => {
+  const hits = collectSignals(FIX).filter((s) => s.kind === 'untested');
+  assert.equal(hits.length, 2, '픽스처 두 모듈 모두 테스트가 없다');
+});
+
+test('진입차수 0 모듈을 찾는다', () => {
+  const hits = collectSignals(FIX).filter((s) => s.kind === 'orphan');
+  assert.deepEqual(hits.map((h) => h.anchor), [':feature:feature_home']);
 });
