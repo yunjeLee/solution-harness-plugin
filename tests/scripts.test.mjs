@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join as pjoin } from 'node:path';
+import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
+
+const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
+
+test('Gradle settings 에서 모듈 2개를 찾는다', () => {
+  const mods = discoverModules(FIX);
+  assert.equal(mods.length, 2);
+  assert.deepEqual(
+    mods.map((m) => m.path).sort(),
+    ['core/core_util', 'feature/feature_home'],
+  );
+});
+
+test('id 를 폴더 경로로 옮긴다', () => {
+  const m = discoverModules(FIX).find((x) => x.id === ':core:core_util');
+  assert.equal(m.path, 'core/core_util');
+});
+
+// 타입세이프 액세서(projects.core.coreUtil)와 문자열 표기(project(":core:core_util"))를
+// 둘 다 해석해야 한다. 하나만 지원하면 실제 레포에서 의존성이 통째로 비어 나온다.
+test('타입세이프 액세서 의존성을 해석한다', () => {
+  const home = discoverModules(FIX).find((x) => x.id === ':feature:feature_home');
+  assert.deepEqual(home.deps, [':core:core_util']);
+});
+
+test('의존성이 없는 모듈은 빈 배열이다', () => {
+  const util = discoverModules(FIX).find((x) => x.id === ':core:core_util');
+  assert.deepEqual(util.deps, []);
+});
+
+test('accessorOf 가 언더스코어를 카멜로 바꾼다', () => {
+  // dalla 실측으로 확인된 규칙이다 — settings 의 ":core:core_util" 에 대응하는
+  // build.gradle.kts 의 액세서가 projects.core.coreUtil 이다(단일 언더스코어만 카멜로).
+  assert.equal(accessorOf(':core:core_util'), 'projects.core.coreUtil');
+  assert.equal(accessorOf(':core:core_designsystem'), 'projects.core.coreDesignsystem');
+  assert.equal(accessorOf(':app'), 'projects.app');
+});
+
+// 한 줄 형식과 여러 줄 형식을 둘 다 해석해야 한다. 한쪽만 지원하면
+// 픽스처는 통과하고 실제 레포에서만 모듈이 0개가 된다.
+test('한 줄 include 형식도 해석한다', () => {
+  const d = mkdtempSync(pjoin(tmpdir(), 'gr-'));
+  writeFileSync(pjoin(d, 'settings.gradle.kts'),
+    'rootProject.name = "x"\nincludeBuild("build-logic")\ninclude(":app")\n');
+  assert.deepEqual(discoverModules(d).map((m) => m.id), [':app']);
+});
+
+// include( ) 블록 **밖**의 콜론 문자열은 모듈이 아니다.
+// dalla 실측에서 excludedTaskNames 의 태스크 경로가 모듈로 잡혔다.
+test('include 블록 밖의 태스크 경로를 모듈로 세지 않는다', () => {
+  const d = mkdtempSync(pjoin(tmpdir(), 'gr-'));
+  writeFileSync(pjoin(d, 'settings.gradle.kts'),
+    'gradle.startParameter.excludedTaskNames.addAll(listOf(":build-logic:convention:testClasses"))\n' +
+    'include(\n    ":app",\n)\n');
+  assert.deepEqual(discoverModules(d).map((m) => m.id), [':app']);
+});
