@@ -65,3 +65,21 @@ test('태그를 생성하는 자리에 신뢰도 태그가 없다', () => {
   }
   assert.deepEqual(hits, [], `신뢰도 태그 잔존:\n${hits.join('\n')}`);
 });
+
+test('interview 문서에 신호 8종과 진행 규칙이 있다', () => {
+  const md = read('shared/interview.md');
+  for (const kind of ['unused', 'deprecated', 'hack', 'reversed', 'orphan', 'untested', 'moved']) {
+    assert.ok(md.includes(kind), `신호 ${kind} 가 없다`);
+  }
+  assert.ok(md.includes('같은 역할이 둘'), '에이전트 담당 8번째 신호가 없다');
+  assert.match(md, /8문항/, '라운드 크기가 없다');
+  assert.ok(md.includes('상') && md.includes('중') && md.includes('하'), '등급 3종이 없다');
+  assert.match(md, /기본값.*중단|중단.*기본값/, '중단 기본값 규칙이 없다');
+  assert.match(md, /interview-log\.json/, '재질문 방지 기록이 없다');
+});
+
+// 스킬이 아니라 참조 문서다. SKILL.md 가 되면 / 목록에 노출된다.
+test('interview 는 스킬이 아니다', () => {
+  assert.ok(!existsSync(ROOT + 'skills/harness-interview'));
+  assert.ok(!existsSync(ROOT + 'skills/interview'));
+});
