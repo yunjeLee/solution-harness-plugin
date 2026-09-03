@@ -83,3 +83,36 @@ test('interview 는 스킬이 아니다', () => {
   assert.ok(!existsSync(ROOT + 'skills/harness-interview'));
   assert.ok(!existsSync(ROOT + 'skills/interview'));
 });
+
+test('harness-scout 이 harness-read-write 를 대체했다', () => {
+  assert.ok(!existsSync(ROOT + 'agents/harness-read-write.md'));
+  assert.ok(existsSync(ROOT + 'agents/harness-scout.md'));
+});
+
+// 문서를 쓰지 않는 에이전트다. Write/Edit 이 남으면 코드 요약 생성이 되살아난다.
+test('harness-scout 은 Write·Edit 도구가 없다', () => {
+  const tools = read('agents/harness-scout.md').match(/^tools:.*$/m)[0];
+  assert.ok(!/\bWrite\b/.test(tools), `tools 에 Write 가 있다: ${tools}`);
+  assert.ok(!/\bEdit\b/.test(tools), `tools 에 Edit 가 있다: ${tools}`);
+});
+
+test('harness-scout 에 mode 2종이 있다', () => {
+  const md = read('agents/harness-scout.md');
+  assert.ok(md.includes('interview'));
+  assert.ok(md.includes('extract'));
+});
+
+test('검증 에이전트가 3축이다', () => {
+  const md = read('agents/harness-doc-verifier.md');
+  for (const keep of ['모호성', '일관성', '참조 무결성']) assert.ok(md.includes(keep));
+  // 완전성은 "답이 없으면 안 쓴다"와 충돌해 폐기됐다. 압축도·실상일치는 스크립트로 갔다.
+  assert.ok(!md.includes('완전성'), '완전성 축이 남아 있다');
+  assert.ok(!md.includes('압축도'), '압축도 축이 남아 있다');
+});
+
+test('plan-reviewer 의 대조 대상이 교체됐다', () => {
+  const md = read('agents/plan-reviewer.md');
+  assert.ok(md.includes('docs/GOTCHA.md'));
+  assert.ok(!md.includes('CONVENTIONS'), 'CONVENTIONS 참조가 남아 있다');
+  assert.ok(!md.includes('ARCHITECTURE'), 'ARCHITECTURE 참조가 남아 있다');
+});
