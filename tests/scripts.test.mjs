@@ -204,3 +204,14 @@ test('깨진 심볼릭 링크가 있어도 checkLineCaps·checkAnchors 가 죽�
   assert.doesNotThrow(() => checkLineCaps(d));
   assert.doesNotThrow(() => checkAnchors(d));
 });
+
+// 부분 문자열 일치로는 `Repo` 가 `UserRepository` 안에 살아있는 것처럼 보여
+// 진짜 죽은 앵커를 놓친다. 단어 경계 일치여야 한다.
+test('앵커 판정은 부분 문자열이 아니라 단어 경계로 한다', () => {
+  const d = tmpRepo({
+    'docs/GOTCHA.md': '# GOTCHA\n\n- `Repo` — 삭제됨\n- `UserRepository` — 살아있다\n',
+    'src/A.kt': 'class UserRepository\n',
+  });
+  const dead = checkAnchors(d);
+  assert.deepEqual(dead.map((x) => x.anchor), ['Repo']);
+});

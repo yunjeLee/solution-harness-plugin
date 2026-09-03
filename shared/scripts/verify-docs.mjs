@@ -61,7 +61,7 @@ export function checkAnchors(root) {
     for (const [, tok] of readFileSync(doc, 'utf8').matchAll(/`([A-Za-z][\w./:]{2,})`/g)) {
       const bare = tok.split(/[./:]/).pop();
       if (!bare || bare.length < 3) continue;
-      if (!code.includes(bare)) dead.push({ file: relative(root, doc), anchor: tok });
+      if (!new RegExp(`\\b${bare}\\b`).test(code)) dead.push({ file: relative(root, doc), anchor: tok });
     }
   }
   return dead;
