@@ -23,8 +23,13 @@ function sourceFiles(root, dir = root, out = []) {
   for (const entry of readdirSync(dir)) {
     if (SKIP_DIR.has(entry)) continue;
     const p = join(dir, entry);
-    if (statSync(p).isDirectory()) sourceFiles(root, p, out);
-    else if (SRC_EXT.has(extname(p))) out.push(p);
+    try {
+      if (statSync(p).isDirectory()) sourceFiles(root, p, out);
+      else if (SRC_EXT.has(extname(p))) out.push(p);
+    } catch {
+      // 깨진 심볼릭 링크(ENOENT)나 순환 링크(ELOOP)는 건너뛴다.
+      continue;
+    }
   }
   return out;
 }

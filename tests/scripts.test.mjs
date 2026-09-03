@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, symlinkSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join as pjoin } from 'node:path';
 import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
@@ -138,4 +138,18 @@ test('테스트 0개 모듈을 찾는다', () => {
 test('진입차수 0 모듈을 찾는다', () => {
   const hits = collectSignals(FIX).filter((s) => s.kind === 'orphan');
   assert.deepEqual(hits.map((h) => h.anchor), [':feature:feature_home']);
+});
+
+test('깨진 심볼릭 링크가 있어도 collectSignals 가 죽지 않는다', () => {
+  // ENOENT(끊긴 링크)·ELOOP(순환 링크)가 statSync 에서 던져지면
+  // sourceFiles() 가 통째로 죽어 harness-init 전체가 크래시한다.
+  const d = mkdtempSync(pjoin(tmpdir(), 'sig-'));
+  writeFileSync(pjoin(d, 'settings.gradle.kts'), 'rootProject.name = "x"\ninclude(":app")\n');
+  mkdirSync(pjoin(d, 'app/src/main/java'), { recursive: true });
+  writeFileSync(pjoin(d, 'app/src/main/java/Foo.kt'), 'class Foo { fun run() = Unit }\n');
+  symlinkSync(pjoin(d, 'does-not-exist'), pjoin(d, 'broken-link'));
+
+  assert.doesNotThrow(() => collectSignals(d));
+  const hits = collectSignals(d);
+  assert.ok(hits.some((s) => s.file.includes('Foo.kt')), '실제 소스 파일의 신호를 못 찾았다');
 });
