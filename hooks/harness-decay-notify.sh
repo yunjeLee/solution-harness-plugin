@@ -2,7 +2,7 @@
 # Hook: 하네스 문서 decay 알림 (안전장치)
 # Matcher: PostToolUse / Bash
 # git commit 직후, 모듈 디렉토리의 누적 변경 라인 또는 CLAUDE.md 마지막 수정 경과일이
-# 임계치를 넘으면 stderr 로 알림 + /harness-module-edit 유도. commit 은 차단하지 않음(exit 0).
+# 임계치를 넘으면 stderr 로 알림 + /gotcha 유도. commit 은 차단하지 않음(exit 0).
 # 설계 원칙 3: 알림만. 검증/카운터는 스킬 내부에서 처리한다.
 set -uo pipefail
 
@@ -35,7 +35,7 @@ echo "$changed" | grep -oE '^([^/]+/)*' | sort -u | while read -r dir; do
 
   if [ "${lines:-0}" -ge "$LINE_THRESHOLD" ] || [ "$days" -ge "$DAY_THRESHOLD" ]; then
     echo "📉 하네스 decay 의심: $claude_md (누적 변경 ${lines}줄 / 마지막 갱신 ${days}일 전)" >&2
-    echo "   코드가 문서보다 앞서갔을 수 있습니다 → /harness-module-edit ${dir%/} 로 갱신을 검토하세요." >&2
+    echo "   코드가 문서보다 앞서갔을 수 있습니다 → /gotcha 로 이 모듈에 적어둘 것이 있는지 검토하세요." >&2
   fi
 done
 

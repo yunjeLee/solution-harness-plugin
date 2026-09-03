@@ -80,3 +80,14 @@ test('harness.config.yml 생성 창구는 work 와 test-level 둘뿐이다', () 
     assert.ok(!has(p), `${p} 가 설정 파일을 생성하려 한다 — 창구는 2곳이어야 한다`);
   }
 });
+
+// 스킬 표에 사라진 행이 남으면 사용자가 없는 명령을 친다.
+test('README 스킬 표가 현재 스킬과 일치한다', () => {
+  const md = readFileSync(ROOT + 'README.md', 'utf8');
+  for (const gone of ['`harness-root`', '`harness-root-edit`', '`harness-module`', '`harness-module-edit`', '`harness-update`']) {
+    assert.ok(!md.includes(`| ${gone} |`), `README 에 삭제된 스킬 행이 남아 있다: ${gone}`);
+  }
+  for (const req of ['`harness-init`', '`gotcha`']) {
+    assert.ok(md.includes(`| ${req} |`), `README 에 ${req} 행이 없다`);
+  }
+});

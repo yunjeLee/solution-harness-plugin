@@ -181,3 +181,57 @@ test('claude-md 템플릿 골격에 조건부 로딩 헤딩을 정적으로 박�
     '자리표시자가 사라지면 조건부 로딩 블록 자체가 골격에서 빠진 것이다'
   );
 });
+
+test('스킬이 정확히 10개다', () => {
+  const skills = readdirSync(ROOT + 'skills').sort();
+  assert.deepEqual(skills, [
+    'e2e-test',
+    'gotcha',
+    'harness-check',
+    'harness-init',
+    'harness-verify',
+    'integration-test',
+    'pin',
+    'test-level',
+    'unit-test',
+    'work',
+  ]);
+});
+
+test('삭제된 스킬 이름이 어디에도 남아 있지 않다', () => {
+  const GONE = ['harness-root', 'harness-root-edit', 'harness-module', 'harness-module-edit', 'harness-update'];
+  const walk = (d, out = []) => {
+    for (const e of readdirSync(ROOT + d, { withFileTypes: true })) {
+      const p = `${d}/${e.name}`;
+      if (e.isDirectory()) walk(p, out);
+      else if (/\.(md|sh|mjs|js|json)$/.test(p)) out.push(p);
+    }
+    return out;
+  };
+  const files = ['skills', 'agents', 'hooks', 'shared'].flatMap((d) => walk(d));
+  const hits = [];
+  for (const f of files) {
+    const t = read(f);
+    for (const g of GONE) {
+      // harness-root 는 harness-root-edit 의 부분문자열이다. 경계를 붙여 오탐을 막는다.
+      if (new RegExp(`${g}(?![\\w-])`).test(t)) hits.push(`${f} :: ${g}`);
+    }
+  }
+  assert.deepEqual(hits, [], `삭제된 스킬 참조 잔존:\n${hits.join('\n')}`);
+});
+
+test('harness-check 의 출구가 둘로 나뉘었다', () => {
+  const md = read('skills/harness-check/SKILL.md');
+  assert.ok(md.includes('gotcha'), 'gotcha 호출 분기가 없다');
+  assert.ok(!md.includes('.harness/issues'), '.harness/issues 기록이 남아 있다');
+});
+
+test('harness-verify 의 인자가 폐지됐다', () => {
+  const md = read('skills/harness-verify/SKILL.md');
+  assert.ok(!/harness-verify (root|module)/.test(md), 'root/module 인자가 남아 있다');
+  assert.ok(md.includes('verify-docs.mjs'), '스크립트 2축 호출이 없다');
+});
+
+test('워크플로우 계약 테스트가 삭제됐다', () => {
+  assert.ok(!existsSync(ROOT + 'tests/agent-type-prefix.test.mjs'));
+});

@@ -35,7 +35,7 @@ E2E 는 사용자 여정 단위라 단일 work 와 1:1 이 아니다. 플로우�
    - `work` 경로에서는 6.5-B 가 이미 걸러 호출하지 않는다. 이 확인은 **사람이 이 스킬을 직접 호출한 경우**를 위한 것이다.
 
 2. **도구 로드**: `@docs/rules/TESTING.md` 에서 E2E 도구/명령(예: Android Espresso/Maestro, iOS XCUITest/Maestro)을 읽는다(단일 출처).
-   - ⚠️ **그린필드 가드**: E2E 도구·규칙이 비어 있으면 → 작성을 멈추고 `/harness-root`(또는 `/harness-root-edit testing`) 로 분기해 스택을 먼저 확정한다.
+   - ⚠️ **그린필드 가드**: E2E 도구·규칙이 비어 있으면 → 작성을 멈추고 `/harness-init` 로 분기해 스택을 먼저 확정한다.
 
 3. **작성 위임**: `work` 6.5-B 가 도출한 3열 명세(파일 / 레벨 / 단언할 것)의 `ui` 행을 **`test-writer` 에이전트**에 전달하고, 실행 명령을 준비한다.
    - 함께 전달: 허용 레벨(1.5 확정값) · run-id · `docs/rules/TESTING.md` 경로 · 아래 제약.
