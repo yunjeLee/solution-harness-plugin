@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join as pjoin } from 'node:path';
 import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
 import { buildGraph } from '../shared/scripts/deps.mjs';
+import { renderModuleMap, renderTriggers } from '../shared/scripts/index-modules.mjs';
 
 const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
 
@@ -77,4 +78,29 @@ test('진입차수를 센다', () => {
 // core 가 feature 에 의존하면 계층이 뒤집힌 것이다.
 test('역방향 간선이 없으면 빈 배열이다', () => {
   assert.deepEqual(buildGraph(FIX).reversed, []);
+});
+
+test('MODULE_MAP 은 경로 인덱스만 담는다', () => {
+  const md = renderModuleMap(FIX);
+  assert.match(md, /core\/core_util/);
+  assert.match(md, /feature\/feature_home/);
+  // 역할 요약 컬럼은 폐지됐다(spec 결정 10). 되살아나면 코드 요약이 다시 들어온다.
+  assert.doesNotMatch(md, /역할/);
+});
+
+test('MODULE_MAP 은 존재하는 모듈 CLAUDE.md 만 링크한다', () => {
+  // 픽스처에는 모듈 CLAUDE.md 가 없다. 없는 파일을 링크하면 참조 무결성이 깨진다.
+  assert.doesNotMatch(renderModuleMap(FIX), /core_util\/CLAUDE\.md/);
+});
+
+test('트리거 블록에 모듈 접근 줄이 없다', () => {
+  // 모듈 CLAUDE.md 는 파일 위치가 트리거다. CLAUDE.md 에 줄을 만들지 않는다.
+  const t = renderTriggers(FIX);
+  assert.match(t, /## 조건부 로딩/);
+  assert.doesNotMatch(t, /core_util/);
+});
+
+test('트리거 블록은 존재하는 문서만 등록한다', () => {
+  // 픽스처에 docs/rules/ 가 없으므로 TESTING·GIT_WORKFLOW 줄이 없어야 한다.
+  assert.doesNotMatch(renderTriggers(FIX), /TESTING\.md/);
 });
