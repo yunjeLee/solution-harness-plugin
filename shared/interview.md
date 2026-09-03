@@ -71,8 +71,8 @@
 
 ```json
 [
-  { "id": "unused:core/core_navigation/FeatureEntry.kt#FeatureEntry", "answered": "폐기 예정" },
-  { "id": "untested:feature/feature_home#:feature:feature_home", "answered": "모름" }
+  { "id": "unused:{파일}#{앵커}", "answered": "폐기 예정" },
+  { "id": "untested:{파일}#{앵커}", "answered": "모름" }
 ]
 ```
 
