@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join as pjoin } from 'node:path';
 import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
+import { buildGraph } from '../shared/scripts/deps.mjs';
 
 const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
 
@@ -58,4 +59,22 @@ test('include 블록 밖의 태스크 경로를 모듈로 세지 않는다', () 
     'gradle.startParameter.excludedTaskNames.addAll(listOf(":build-logic:convention:testClasses"))\n' +
     'include(\n    ":app",\n)\n');
   assert.deepEqual(discoverModules(d).map((m) => m.id), [':app']);
+});
+
+test('의존성 그래프의 노드와 간선을 만든다', () => {
+  const g = buildGraph(FIX);
+  assert.equal(g.nodes.length, 2);
+  assert.deepEqual(g.edges, [[':feature:feature_home', ':core:core_util']]);
+});
+
+// 진입차수 0 = 아무도 안 쓰는 모듈. 이상 신호의 입력이 된다.
+test('진입차수를 센다', () => {
+  const g = buildGraph(FIX);
+  assert.equal(g.inbound.get(':core:core_util'), 1);
+  assert.equal(g.inbound.get(':feature:feature_home'), 0);
+});
+
+// core 가 feature 에 의존하면 계층이 뒤집힌 것이다.
+test('역방향 간선이 없으면 빈 배열이다', () => {
+  assert.deepEqual(buildGraph(FIX).reversed, []);
 });
