@@ -3,11 +3,14 @@ import test from 'node:test';
 import { mkdtempSync, writeFileSync, symlinkSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join as pjoin } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
 import { buildGraph } from '../shared/scripts/deps.mjs';
 import { renderModuleMap, renderTriggers } from '../shared/scripts/index-modules.mjs';
 import { collectSignals } from '../shared/scripts/signals.mjs';
 import { checkLineCaps, checkAnchors } from '../shared/scripts/verify-docs.mjs';
+
+const VERIFY_DOCS_CLI = new URL('../shared/scripts/verify-docs.mjs', import.meta.url).pathname;
 
 const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
 
@@ -214,4 +217,14 @@ test('앵커 판정은 부분 문자열이 아니라 단어 경계로 한다', (
   });
   const dead = checkAnchors(d);
   assert.deepEqual(dead.map((x) => x.anchor), ['Repo']);
+});
+
+// gotcha 스킬의 상한 게이트는 "쓰기 전에 현재 줄 수를 읽는다"를 전제로 한다.
+// CLI 가 위반이 아닐 때도 줄 수를 찍지 않으면 그 전제를 구현할 수 없다.
+test('CLI 는 상한 이하 문서도 현재 줄 수를 출력하고 종료 코드는 0이다', () => {
+  const d = tmpRepo({ 'docs/GOTCHA.md': '# GOTCHA\n' + '- x — y\n'.repeat(50) }); // 51줄, 상한 60
+  const r = spawnSync('node', [VERIFY_DOCS_CLI, d], { encoding: 'utf8' });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /COUNT docs\/GOTCHA\.md: 51\/60줄/);
+  assert.ok(!r.stdout.includes('CAP  docs/GOTCHA.md'), '위반이 아닌데 CAP 줄이 찍혔다');
 });

@@ -29,21 +29,24 @@ function walk(root, dir = root, out = []) {
   return out;
 }
 
-export function checkLineCaps(root) {
-  const hits = [];
+/** 상한이 있는 모든 문서의 현재 줄 수를 모은다(위반 여부와 무관하게). */
+export function docLineCounts(root) {
+  const counts = [];
   for (const [rel, cap] of CAPS) {
     const p = join(root, rel);
     if (!existsSync(p)) continue;
-    const lines = lineCount(p);
-    if (lines > cap) hits.push({ file: rel, lines, cap });
+    counts.push({ file: rel, lines: lineCount(p), cap });
   }
   for (const p of walk(root).filter((f) => f.endsWith('/CLAUDE.md'))) {
     const rel = relative(root, p);
     if (rel === 'CLAUDE.md') continue;
-    const lines = lineCount(p);
-    if (lines > MODULE_CAP) hits.push({ file: rel, lines, cap: MODULE_CAP });
+    counts.push({ file: rel, lines: lineCount(p), cap: MODULE_CAP });
   }
-  return hits;
+  return counts;
+}
+
+export function checkLineCaps(root) {
+  return docLineCounts(root).filter((c) => c.lines > c.cap);
 }
 
 /** 하네스 문서의 백틱 토큰이 코드에 아직 있는지 본다. */
@@ -69,8 +72,10 @@ export function checkAnchors(root) {
 
 if (process.argv[1] && process.argv[1].endsWith('verify-docs.mjs')) {
   const root = process.argv[2] ?? process.cwd();
+  const counts = docLineCounts(root);
   const caps = checkLineCaps(root);
   const dead = checkAnchors(root);
+  for (const c of counts) console.log(`COUNT ${c.file}: ${c.lines}/${c.cap}줄`);
   for (const c of caps) console.log(`CAP  ${c.file}: ${c.lines}줄 (상한 ${c.cap})`);
   for (const d of dead) console.log(`DEAD ${d.file}: \`${d.anchor}\` 가 코드에 없다`);
   if (caps.length + dead.length === 0) console.log('OK');
