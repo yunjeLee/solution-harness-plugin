@@ -136,3 +136,33 @@ test('gotcha 에 배치 3지선다와 상한 교환 규칙이 있다', () => {
 test('gotcha 가 이유를 필수로 요구한다', () => {
   assert.match(read('skills/gotcha/SKILL.md'), /이유를 반드시|이유가 없으면/);
 });
+
+test('harness-init 이 harness-root 를 대체했다', () => {
+  assert.ok(!existsSync(ROOT + 'skills/harness-root'));
+  assert.ok(existsSync(ROOT + 'skills/harness-init/SKILL.md'));
+  assert.match(read('skills/harness-init/SKILL.md'), /^name: harness-init$/m);
+});
+
+test('harness-init 에 모드 판정 4종이 있다', () => {
+  const md = read('skills/harness-init/SKILL.md');
+  for (const mode of ['신규', '이관', '이관 미완', '갱신']) {
+    assert.ok(md.includes(mode), `${mode} 모드가 없다`);
+  }
+});
+
+// 이관은 루트 문서 7종과 모듈 CLAUDE.md 전체를 지운다(dalla 실측 41개 파일).
+  // y/N 은 오타 한 번에 그 전부를 날린다(spec 결정 35).
+test('파괴적 게이트가 삭제 단어 입력이다', () => {
+  const md = read('skills/harness-init/SKILL.md');
+  assert.match(md, /`삭제`/, '삭제 단어 게이트가 없다');
+  assert.match(md, /git show HEAD:/, '복원 방법 안내가 없다');
+});
+
+test('harness-init 이 사람 지식을 덮어쓰지 않는다', () => {
+  const md = read('skills/harness-init/SKILL.md');
+  assert.match(md, /덮어쓰지 않는다/, '멱등성 규칙이 없다');
+});
+
+test('harness-init 이 빈 모듈 문서를 만들지 않는다', () => {
+  assert.match(read('skills/harness-init/SKILL.md'), /빈 .*CLAUDE\.md.*만들지 않는다|만들지 않는다.*빈/);
+});
