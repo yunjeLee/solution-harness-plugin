@@ -7,6 +7,7 @@ import { discoverModules, accessorOf } from '../shared/scripts/lib/modules.mjs';
 import { buildGraph } from '../shared/scripts/deps.mjs';
 import { renderModuleMap, renderTriggers } from '../shared/scripts/index-modules.mjs';
 import { collectSignals } from '../shared/scripts/signals.mjs';
+import { checkLineCaps, checkAnchors } from '../shared/scripts/verify-docs.mjs';
 
 const FIX = new URL('./fixtures/mini-repo/', import.meta.url).pathname;
 
@@ -152,4 +153,54 @@ test('깨진 심볼릭 링크가 있어도 collectSignals 가 죽지 않는다',
   assert.doesNotThrow(() => collectSignals(d));
   const hits = collectSignals(d);
   assert.ok(hits.some((s) => s.file.includes('Foo.kt')), '실제 소스 파일의 신호를 못 찾았다');
+});
+
+function tmpRepo(files) {
+  const d = mkdtempSync(pjoin(tmpdir(), 'hv-'));
+  for (const [rel, body] of Object.entries(files)) {
+    const p = pjoin(d, rel);
+    mkdirSync(pjoin(p, '..'), { recursive: true });
+    writeFileSync(p, body);
+  }
+  return d;
+}
+
+test('상한을 넘은 문서만 보고한다', () => {
+  const d = tmpRepo({
+    'docs/GOTCHA.md': '# GOTCHA\n' + '- x — y\n'.repeat(60),  // 61줄
+    'CLAUDE.md': '# a\n',
+  });
+  const hits = checkLineCaps(d);
+  assert.equal(hits.length, 1);
+  assert.match(hits[0].file, /GOTCHA/);
+  assert.equal(hits[0].cap, 60);
+});
+
+test('상한 이하는 보고하지 않는다', () => {
+  const d = tmpRepo({ 'docs/GOTCHA.md': '# GOTCHA\n' + '- x — y\n'.repeat(58) }); // 59줄
+  assert.deepEqual(checkLineCaps(d), []);
+});
+
+// 언급 대상이 코드에서 사라진 gotcha 는 무의미하다. 이것이 decay 감지다.
+test('코드에서 사라진 앵커를 찾는다', () => {
+  const d = tmpRepo({
+    'docs/GOTCHA.md': '# GOTCHA\n\n## 죽은 것 — 있지만 쓰지 마라\n- `GoneSymbol` — 폐기 예정\n- `LiveSymbol` — 아직 쓴다\n',
+    'src/A.kt': 'class LiveSymbol\n',
+  });
+  const dead = checkAnchors(d);
+  assert.deepEqual(dead.map((x) => x.anchor), ['GoneSymbol']);
+});
+
+test('깨진 심볼릭 링크가 있어도 checkLineCaps·checkAnchors 가 죽지 않는다', () => {
+  // verify-docs.mjs 의 walk() 는 signals.mjs 의 sourceFiles() 와 같은 결함을 갖고 있었다:
+  // statSync(p) 가 ENOENT(끊긴 링크)·ELOOP(순환 링크)를 던지면 아무도 잡지 않아
+  // checkLineCaps/checkAnchors 가 통째로 죽는다.
+  const d = tmpRepo({
+    'CLAUDE.md': '# a\n',
+    'src/A.kt': 'class LiveSymbol\n',
+  });
+  symlinkSync(pjoin(d, 'does-not-exist'), pjoin(d, 'broken-link'));
+
+  assert.doesNotThrow(() => checkLineCaps(d));
+  assert.doesNotThrow(() => checkAnchors(d));
 });
