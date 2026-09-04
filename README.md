@@ -14,7 +14,7 @@
 | `harness-init` | 하네스 구축·이관·갱신 단일 진입점 (스크립트 + 인터뷰) |
 | `gotcha` | 사람 지식 한 줄을 GOTCHA 또는 모듈 CLAUDE.md 에 기록 |
 | `harness-verify` | 하네스 문서 3축 검증 |
-| `harness-check` | 산출물↔하네스 불일치 진단 → 로컬 기록 |
+| `harness-check` | 산출물↔하네스 불일치 진단 → `gotcha` 기록 또는 사람 소유 문서 수정 문안 출력 |
 | `work` | 닫힌 루프 엔진 (입력→레벨 확정→(계획→검토)→6a~6d→통합/E2E→검증) |
 | `unit-test` | 한 모듈 안 단위 테스트 **코드 작성** (test-first). work 6b 가 호출 — 실행은 안 함 |
 | `integration-test` | 모듈 경계 통합 테스트 **코드 작성** (test-after). work 6.5 가 경계 감지 시 호출 — 실행은 안 함 |

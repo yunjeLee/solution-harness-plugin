@@ -228,3 +228,24 @@ test('CLI 는 상한 이하 문서도 현재 줄 수를 출력하고 종료 코�
   assert.match(r.stdout, /COUNT docs\/GOTCHA\.md: 51\/60줄/);
   assert.ok(!r.stdout.includes('CAP  docs/GOTCHA.md'), '위반이 아닌데 CAP 줄이 찍혔다');
 });
+
+// `build.gradle.kts` 의 bare 토큰은 `kts` 다 — 파일 확장자는 식별자로 코드에 나타날 수 없어
+// 구조적으로 항상 DEAD 로 오탐된다.
+test('파일 확장자로 끝나는 앵커는 죽은 것으로 보지 않는다', () => {
+  const d = tmpRepo({
+    'docs/GOTCHA.md': '# GOTCHA\n\n- `build.gradle.kts` — 루트 빌드 설정\n- `GoneSymbol` — 폐기 예정\n',
+    'src/A.kt': 'class Live\n',
+  });
+  const dead = checkAnchors(d);
+  assert.deepEqual(dead.map((x) => x.anchor), ['GoneSymbol']);
+});
+
+// `File.kt:261` 의 bare 토큰은 `261` 이다 — 줄 번호는 식별자가 아니라 그 자체로 검색될 수 없다.
+test('줄 번호로 끝나는 앵커는 죽은 것으로 보지 않는다', () => {
+  const d = tmpRepo({
+    'docs/GOTCHA.md': '# GOTCHA\n\n- `Foo.kt:261` — 참고\n- `GoneSymbol` — 폐기 예정\n',
+    'src/Foo.kt': 'class Foo\n',
+  });
+  const dead = checkAnchors(d);
+  assert.deepEqual(dead.map((x) => x.anchor), ['GoneSymbol']);
+});

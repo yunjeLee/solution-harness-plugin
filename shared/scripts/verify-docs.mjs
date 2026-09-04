@@ -59,11 +59,14 @@ export function checkAnchors(root) {
     .map((f) => readFileSync(f, 'utf8'))
     .join('\n');
 
+  const extSet = new Set([...SRC_EXT].map((e) => e.slice(1)));
   const dead = [];
   for (const doc of docs) {
     for (const [, tok] of readFileSync(doc, 'utf8').matchAll(/`([A-Za-z][\w./:]{2,})`/g)) {
       const bare = tok.split(/[./:]/).pop();
       if (!bare || bare.length < 3) continue;
+      if (extSet.has(bare)) continue; // `build.gradle.kts` 같은 확장자 꼬리는 식별자가 아니다.
+      if (/^\d+$/.test(bare)) continue; // `File.kt:261` 같은 줄 참조의 줄 번호는 식별자가 아니다.
       if (!new RegExp(`\\b${bare}\\b`).test(code)) dead.push({ file: relative(root, doc), anchor: tok });
     }
   }
