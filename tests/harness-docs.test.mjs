@@ -235,3 +235,17 @@ test('harness-verify 의 인자가 폐지됐다', () => {
 test('워크플로우 계약 테스트가 삭제됐다', () => {
   assert.ok(!existsSync(ROOT + 'tests/agent-type-prefix.test.mjs'));
 });
+
+// agent 쪽은 '검증 에이전트가 3축이다'가 지킨다. 스킬 쪽에 같은 축 목록이
+// 복사돼 있으면 agent 가 축을 줄여도 스킬 문서는 낡은 6축을 계속 지시한다 —
+// 이번 갭이 실제로 이렇게 통과했다.
+test('harness-verify 스킬이 폐기 축을 지시하지 않는다', () => {
+  const md = read('skills/harness-verify/SKILL.md');
+  for (const gone of ['6축', '완전성', '압축도']) {
+    assert.ok(!md.includes(gone), `${gone} 는 폐기되었거나(완전성) 스크립트로 옮겨졌다(압축도) — 스킬이 여전히 이 축의 검증을 지시하면 agent 가 수행하지 않는 리뷰를 요구하게 된다: ${gone}`);
+  }
+  for (const keep of ['모호성', '일관성', '참조 무결성']) {
+    assert.ok(md.includes(keep), `${keep} 축이 없다`);
+  }
+  assert.ok(md.includes('verify-docs.mjs'), '스크립트 2축 호출이 없다');
+});
