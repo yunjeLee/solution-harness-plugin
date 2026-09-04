@@ -2,7 +2,7 @@
 name: harness-scout
 description: 코드베이스를 격리된 컨텍스트에서 대량으로 읽고, 인터뷰 질문 문안(mode=interview) 또는 구버전 문서에서 건져낼 사람 지식(mode=extract)을 반환하는 정찰 에이전트. harness-init 이 위임할 때 사용한다. 문서를 쓰지 않는다.
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: opus
 ---
 
 # Scout Agent — 질문 생성 / 지식 추출

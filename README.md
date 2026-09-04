@@ -25,7 +25,7 @@
 ### Sub-agents
 | Agent | 역할 |
 |------|------|
-| `harness-scout` | 인터뷰 질문 생성 / 구문서 지식 추출 — 문서를 쓰지 않음 (sonnet) |
+| `harness-scout` | 인터뷰 질문 생성 / 구문서 지식 추출 — 문서를 쓰지 않음 |
 | `harness-doc-verifier` | 문서 3축 검증 (opus) |
 | `plan-reviewer` | 계획 7축 검토 (opus) |
 | `completion-verifier` | 6c Red 확인·완료기준 명령 격리 실행·결과 보고 (opus) |
