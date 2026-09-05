@@ -42,7 +42,7 @@
 | Script | 역할 |
 |--------|------|
 | `shared/scripts/lib/modules.mjs` | 모듈 발견 + 의존성 파싱 — 모듈을 아는 유일한 코드 |
-| `shared/scripts/deps.mjs` | 의존성 그래프 즉석 출력 (파일로 저장하지 않음) |
+| `shared/scripts/deps.mjs` | 의존성 그래프 빌드 (`signals.mjs` 가 import — CLI 없음) |
 | `shared/scripts/index-modules.mjs` | `docs/MODULE_MAP.md` 생성 + `CLAUDE.md` 트리거 블록 출력 |
 | `shared/scripts/signals.mjs` | 이상 신호 7종 수집 → 인터뷰 질문의 앵커 |
 | `shared/scripts/verify-docs.mjs` | 앵커 생존 · 줄 수 2축 검증 |
